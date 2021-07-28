@@ -64,13 +64,8 @@ class RequestCode {
 
   String _mapToQueryParams(Map<String, String> params) {
     final queryParams = <String>[];
-    params.forEach((String key, String value) {
-        if(key == 'scope') {
-          queryParams.add('$key=${value.replaceAll(' ', '%20')}');
-        } else {
-          queryParams.add('$key=${Uri.encodeQueryComponent(value)}');
-        }
-    });
+    params.forEach((String key, String value) =>
+        queryParams.add('$key=${Uri.encodeQueryComponent(value)}'));
     return queryParams.join('&');
   }
 }
