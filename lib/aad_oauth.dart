@@ -72,12 +72,12 @@ class AadOAuth {
   }
 
   /// Check if we need to relaunch a full auth
-  Future<Token?> needFullAuth({bool refreshIfAvailable = false}) async {
+  Future<bool> needFullAuth({bool refreshIfAvailable = false}) async {
     var token = await _authStorage.loadTokenFromCache();
 
     if (!refreshIfAvailable) {
       if (token.hasValidAccessToken()) {
-        return token;
+        return false;
       }
     }
 
@@ -86,14 +86,11 @@ class AadOAuth {
         token = await _requestToken.requestRefreshToken(token.refreshToken!);
       } catch (e) {
         await logout();
+        return true;
       }
     }
 
-    if (token.hasValidAccessToken()) {
-      return token;
-    } else {
-      return null;
-    }
+    return !token.hasValidAccessToken();
   }
 
   /// Authorize user via refresh token or web gui if necessary.
