@@ -62,9 +62,10 @@ class _AadLoginPageState extends State<AadLoginPage> {
           gestureNavigationEnabled: true,
         ),
         !pageLoaded
-            ? Center(
+            ? SizedBox.expand(
+                child: Center(
                 child: widget.onLoadView,
-              )
+              ))
             : Stack()
       ]);
     }));
