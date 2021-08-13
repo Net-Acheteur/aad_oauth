@@ -42,7 +42,6 @@ class _AadLoginPageState extends State<AadLoginPage> {
             closeView(context);
           },
           onProgress: (int progress) {
-            print(progress);
             if (progress == 100) {
               setState(() {
                 pageLoaded = true;
