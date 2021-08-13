@@ -1,28 +1,33 @@
 library aad_oauth;
 
-import 'model/config.dart';
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 import 'helper/auth_storage.dart';
+import 'injector.dart';
+import 'model/config.dart';
 import 'model/token.dart';
 import 'request_code.dart';
 import 'request_token.dart';
-import 'dart:async';
-import 'package:shared_preferences/shared_preferences.dart';
 
 /// Authenticates a user with Azure Active Directory using OAuth2.0.
 class AadOAuth {
   final Config _config;
-  final AuthStorage _authStorage;
-  final RequestCode _requestCode;
-  final RequestToken _requestToken;
+  late final AuthStorage _authStorage;
+  late final RequestCode _requestCode;
+  late final RequestToken _requestToken;
 
   /// Instantiating AadOAuth authentication.
   /// [config] Parameters according to official Microsoft Documentation.
-  AadOAuth(Config config)
-      : _config = config,
-        _authStorage = AuthStorage(tokenIdentifier: config.tokenIdentifier),
-        _requestCode = RequestCode(config),
-        _requestToken = RequestToken(config);
+  AadOAuth(Config config) : _config = config {
+    injectServices();
+
+    _authStorage = getIt<AuthStorage>()..init(tokenIdentifier: config.tokenIdentifier);
+    _requestCode = getIt<RequestCode>()..init(config);
+    _requestToken = getIt<RequestToken>()..init(config);
+  }
 
   /// Set [screenSize] of webview.
   void setWebViewScreenSize(Rect screenSize) {
@@ -55,17 +60,40 @@ class AadOAuth {
   }
 
   /// Retrieve cached OAuth Access Token.
-  Future<String?> getAccessToken() async =>
-      (await _authStorage.loadTokenFromCache()).accessToken;
+  Future<String?> getAccessToken() async => (await _authStorage.loadTokenFromCache()).accessToken;
 
   /// Retrieve cached OAuth Id Token.
-  Future<String?> getIdToken() async =>
-      (await _authStorage.loadTokenFromCache()).idToken;
+  Future<String?> getIdToken() async => (await _authStorage.loadTokenFromCache()).idToken;
 
   /// Perform Azure AD logout.
   Future<void> logout() async {
     await _authStorage.clear();
     await _requestCode.clearCookies();
+  }
+
+  /// Check if we need to relaunch a full auth
+  Future<Token?> needFullAuth({bool refreshIfAvailable = false}) async {
+    var token = await _authStorage.loadTokenFromCache();
+
+    if (!refreshIfAvailable) {
+      if (token.hasValidAccessToken()) {
+        return token;
+      }
+    }
+
+    if (token.hasRefreshToken()) {
+      try {
+        token = await _requestToken.requestRefreshToken(token.refreshToken!);
+      } catch (e) {
+        await logout();
+      }
+    }
+
+    if (token.hasValidAccessToken()) {
+      return token;
+    } else {
+      return null;
+    }
   }
 
   /// Authorize user via refresh token or web gui if necessary.
@@ -98,10 +126,18 @@ class AadOAuth {
 
   /// Authorize user via refresh token or web gui if necessary.
   Future<Token> _performFullAuthFlow() async {
-    var code = await _requestCode.requestCode();
+    final _completer = Completer<String?>();
+
+    var subscription = await _requestCode.onCode.listen((event) {
+      return _completer.complete(event);
+    });
+
+    var code = await _completer.future;
+    await subscription.cancel();
     if (code == null) {
       throw Exception('Access denied or authentication canceled.');
     }
+
     return await _requestToken.requestToken(code);
   }
 

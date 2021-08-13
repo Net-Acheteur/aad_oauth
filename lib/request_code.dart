@@ -1,21 +1,46 @@
 import 'dart:async';
-import 'request/authorization_request.dart';
-import 'model/config.dart';
+
 import 'package:flutter_webview_plugin/flutter_webview_plugin.dart';
+
+import 'model/config.dart';
+import 'request/authorization_request.dart';
 
 class RequestCode {
   final StreamController<String?> _onCodeListener = StreamController();
   final FlutterWebviewPlugin _webView = FlutterWebviewPlugin();
-  final Config _config;
-  final AuthorizationRequest _authorizationRequest;
+  late final Config _config;
+  late final AuthorizationRequest _authorizationRequest;
 
   late Stream<String?> _onCodeStream;
 
-  RequestCode(Config config)
-      : _config = config,
-        _authorizationRequest = AuthorizationRequest(config) {
+  RequestCode();
+
+  void init(Config config) {
+    _config = config;
+    _authorizationRequest = AuthorizationRequest(config);
     _onCodeStream = _onCodeListener.stream.asBroadcastStream();
   }
+
+  String getUrlToLaunch() {
+    final urlParams = _constructUrlParams();
+    return '${_authorizationRequest.url}?$urlParams';
+  }
+
+  bool closeOnUrlChanged(String url) {
+    var uri = Uri.parse(url);
+    if (uri.queryParameters['error'] != null) {
+      _onCodeListener.add(null);
+      return true;
+    }
+
+    if (uri.queryParameters['code'] != null) {
+      _onCodeListener.add(uri.queryParameters['code']);
+      return true;
+    }
+
+    return false;
+  }
+
   Future<String?> requestCode() async {
     String? code;
     final urlParams = _constructUrlParams();
@@ -42,7 +67,7 @@ class RequestCode {
       }
     });
 
-    code = await _onCode.first;
+    code = await onCode.first;
     return code;
   }
 
@@ -57,15 +82,13 @@ class RequestCode {
     await _webView.close();
   }
 
-  Stream<String?> get _onCode => _onCodeStream;
+  Stream<String?> get onCode => _onCodeStream;
 
-  String _constructUrlParams() =>
-      _mapToQueryParams(_authorizationRequest.parameters);
+  String _constructUrlParams() => _mapToQueryParams(_authorizationRequest.parameters);
 
   String _mapToQueryParams(Map<String, String> params) {
     final queryParams = <String>[];
-    params.forEach((String key, String value) =>
-        queryParams.add('$key=${Uri.encodeQueryComponent(value)}'));
+    params.forEach((String key, String value) => queryParams.add('$key=${Uri.encodeQueryComponent(value)}'));
     return queryParams.join('&');
   }
 }

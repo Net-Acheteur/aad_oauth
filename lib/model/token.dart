@@ -69,34 +69,26 @@ class Token {
     if (map == null) throw Exception('No token from received');
     //error handling as described in https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-oauth2-auth-code-flow#error-response-1
     if (map['error'] != null) {
-      throw Exception('Error during token request: ' +
-          map['error'] +
-          ': ' +
-          map['error_description']);
+      throw Exception('Error during token request: ' + map['error'] + ': ' + map['error_description']);
     }
 
     var model = Token();
     model.accessToken = map['access_token'];
     model.tokenType = map['token_type'];
-    model.expiresIn = map['expires_in'] is int
-        ? map['expires_in']
-        : int.tryParse(map['expires_in'].toString()) ?? 60;
+    model.expiresIn = map['expires_in'] is int ? map['expires_in'] : int.tryParse(map['expires_in'].toString()) ?? 60;
     model.refreshToken = map['refresh_token'];
     model.idToken = map.containsKey('id_token') ? map['id_token'] : '';
     model.issueTimeStamp = DateTime.now().toUtc();
     model.expireTimeStamp = map.containsKey('expire_timestamp')
         ? DateTime.fromMillisecondsSinceEpoch(map['expire_timestamp'])
-        : model.issueTimeStamp
-            .add(Duration(seconds: model.expiresIn! - model.expireOffSet));
+        : model.issueTimeStamp.add(Duration(seconds: model.expiresIn! - model.expireOffSet));
 
     return model;
   }
 
   /// Check if Access Token is set and not expired.
   bool hasValidAccessToken() {
-    return accessToken != null &&
-        expireTimeStamp != null &&
-        expireTimeStamp!.isAfter(DateTime.now().toUtc());
+    return accessToken != null && expireTimeStamp != null && expireTimeStamp!.isAfter(DateTime.now().toUtc());
   }
 
   /// Check if Refresh Token is set.
