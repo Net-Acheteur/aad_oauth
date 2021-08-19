@@ -72,13 +72,11 @@ class AadOAuth {
   }
 
   /// Check if we need to relaunch a full auth
-  Future<bool> needFullAuth({bool refreshIfAvailable = false}) async {
+  Future<bool> needFullAuth() async {
     var token = await _authStorage.loadTokenFromCache();
 
-    if (!refreshIfAvailable) {
-      if (token.hasValidAccessToken()) {
-        return false;
-      }
+    if (token.hasValidAccessToken()) {
+      return false;
     }
 
     if (token.hasRefreshToken()) {
