@@ -3,7 +3,6 @@ library aad_oauth;
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import 'helper/auth_storage.dart';
 import 'injector.dart';
@@ -24,7 +23,8 @@ class AadOAuth {
   AadOAuth(Config config) : _config = config {
     injectServices();
 
-    _authStorage = getIt<AuthStorage>()..init(tokenIdentifier: config.tokenIdentifier);
+    _authStorage = getIt<AuthStorage>()
+      ..init(tokenIdentifier: config.tokenIdentifier);
     _requestCode = getIt<RequestCode>()..init(config);
     _requestToken = getIt<RequestToken>()..init(config);
   }
@@ -58,10 +58,12 @@ class AadOAuth {
   }
 
   /// Retrieve cached OAuth Access Token.
-  Future<String?> getAccessToken() async => (await _authStorage.loadTokenFromCache()).accessToken;
+  Future<String?> getAccessToken() async =>
+      (await _authStorage.loadTokenFromCache()).accessToken;
 
   /// Retrieve cached OAuth Id Token.
-  Future<String?> getIdToken() async => (await _authStorage.loadTokenFromCache()).idToken;
+  Future<String?> getIdToken() async =>
+      (await _authStorage.loadTokenFromCache()).idToken;
 
   /// Perform Azure AD logout.
   Future<void> logout() async {
