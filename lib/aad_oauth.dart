@@ -33,7 +33,6 @@ class AadOAuth {
   void setWebViewScreenSize(Rect screenSize) {
     if (screenSize != _config.screenSize) {
       _config.screenSize = screenSize;
-      _requestCode.sizeChanged();
     }
   }
 
@@ -68,7 +67,6 @@ class AadOAuth {
   /// Perform Azure AD logout.
   Future<void> logout() async {
     await _authStorage.clear();
-    await _requestCode.clearCookies();
   }
 
   /// Check if we need to relaunch a full auth
