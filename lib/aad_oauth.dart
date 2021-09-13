@@ -7,7 +7,6 @@ import 'model/token.dart';
 import 'request_code.dart';
 import 'request_token.dart';
 import 'dart:async';
-import 'package:shared_preferences/shared_preferences.dart';
 
 /// Authenticates a user with Azure Active Directory using OAuth2.0.
 class AadOAuth {
@@ -41,7 +40,6 @@ class AadOAuth {
   /// will be returned, as long as we deem it still valid. In the event that
   /// both access and refresh tokens are invalid, the web gui will be used.
   Future<void> login({bool refreshIfAvailable = false}) async {
-    await _removeOldTokenOnFirstLogin();
     await _authorization(refreshIfAvailable: refreshIfAvailable);
   }
 
@@ -94,14 +92,5 @@ class AadOAuth {
       throw Exception('Access denied or authentication canceled.');
     }
     return await _requestToken.requestToken(code);
-  }
-
-  Future<void> _removeOldTokenOnFirstLogin() async {
-    var prefs = await SharedPreferences.getInstance();
-    final _keyFreshInstall = 'freshInstall';
-    if (!prefs.getKeys().contains(_keyFreshInstall)) {
-      await logout();
-      await prefs.setBool(_keyFreshInstall, false);
-    }
   }
 }
