@@ -3,7 +3,6 @@ library aad_oauth;
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import 'helper/auth_storage.dart';
 import 'injector.dart';
@@ -24,7 +23,8 @@ class AadOAuth {
   AadOAuth(Config config) : _config = config {
     injectServices();
 
-    _authStorage = getIt<AuthStorage>()..init(tokenIdentifier: config.tokenIdentifier);
+    _authStorage = getIt<AuthStorage>()
+      ..init(tokenIdentifier: config.tokenIdentifier);
     _requestCode = getIt<RequestCode>()..init(config);
     _requestToken = getIt<RequestToken>()..init(config);
   }
@@ -54,15 +54,16 @@ class AadOAuth {
   /// will be returned, as long as we deem it still valid. In the event that
   /// both access and refresh tokens are invalid, the web gui will be used.
   Future<void> login({bool refreshIfAvailable = false}) async {
-    await _removeOldTokenOnFirstLogin();
     await _authorization(refreshIfAvailable: refreshIfAvailable);
   }
 
   /// Retrieve cached OAuth Access Token.
-  Future<String?> getAccessToken() async => (await _authStorage.loadTokenFromCache()).accessToken;
+  Future<String?> getAccessToken() async =>
+      (await _authStorage.loadTokenFromCache()).accessToken;
 
   /// Retrieve cached OAuth Id Token.
-  Future<String?> getIdToken() async => (await _authStorage.loadTokenFromCache()).idToken;
+  Future<String?> getIdToken() async =>
+      (await _authStorage.loadTokenFromCache()).idToken;
 
   /// Perform Azure AD logout.
   Future<void> logout() async {
@@ -132,14 +133,5 @@ class AadOAuth {
     }
 
     return await _requestToken.requestToken(code);
-  }
-
-  Future<void> _removeOldTokenOnFirstLogin() async {
-    var prefs = await SharedPreferences.getInstance();
-    final _keyFreshInstall = 'freshInstall';
-    if (!prefs.getKeys().contains(_keyFreshInstall)) {
-      await logout();
-      await prefs.setBool(_keyFreshInstall, false);
-    }
   }
 }
