@@ -39,6 +39,11 @@ class _AadLoginPageState extends State<AadLoginPage> {
           initialUrl: widget.requestCode.getUrlToLaunch(),
           navigationDelegate: (NavigationRequest request) => NavigationDecision.navigate,
           javascriptMode: JavascriptMode.unrestricted,
+          onWebViewCreated: (webViewController) {
+            webViewController.clearCache();
+            final cookieManager = CookieManager();
+            cookieManager.clearCookies();
+          },
           onWebResourceError: (WebResourceError e) {
             // HACK for error 102 NSURLErrorCancelled on iOS
             var iosUrl = e.description.split('NSErrorFailingURLStringKey=');
