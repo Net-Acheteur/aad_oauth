@@ -12,6 +12,7 @@ class AadLoginPage extends StatefulWidget {
 
   final RequestCode requestCode = getIt<RequestCode>();
   final Widget onLoadView;
+  late final WebViewController webViewController;
 
   AadLoginPage({Key? key, this.onLoadView = const CircularProgressIndicator()}) : super(key: key);
 
@@ -43,6 +44,7 @@ class _AadLoginPageState extends State<AadLoginPage> {
             webViewController.clearCache();
             final cookieManager = CookieManager();
             cookieManager.clearCookies();
+            widget.webViewController = webViewController;
           },
           onWebResourceError: (WebResourceError e) {
             // HACK for error 102 NSURLErrorCancelled on iOS
