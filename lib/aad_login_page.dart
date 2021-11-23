@@ -14,8 +14,7 @@ class AadLoginPage extends StatefulWidget {
   final Widget onLoadView;
   late final WebViewController webViewController;
 
-  AadLoginPage({Key? key, this.onLoadView = const CircularProgressIndicator()})
-      : super(key: key);
+  AadLoginPage({Key? key, this.onLoadView = const CircularProgressIndicator()}) : super(key: key);
 
   @override
   _AadLoginPageState createState() => _AadLoginPageState();
@@ -39,8 +38,14 @@ class _AadLoginPageState extends State<AadLoginPage> {
       return Stack(children: [
         WebView(
           initialUrl: widget.requestCode.getUrlToLaunch(),
-          navigationDelegate: (NavigationRequest request) =>
-              NavigationDecision.navigate,
+          navigationDelegate: (NavigationRequest request) {
+            if (widget.requestCode.closeOnUrlChanged(request.url)) {
+              exitedWithError = false;
+              closeView(context);
+              return NavigationDecision.prevent;
+            }
+            return NavigationDecision.navigate;
+          },
           javascriptMode: JavascriptMode.unrestricted,
           onWebViewCreated: (webViewController) {
             webViewController.clearCache();
@@ -64,14 +69,10 @@ class _AadLoginPageState extends State<AadLoginPage> {
               pageLoaded = false;
             });
           },
-          onPageFinished: (String url) {
+          onPageFinished: (_) {
             setState(() {
               pageLoaded = true;
             });
-            if (widget.requestCode.closeOnUrlChanged(url)) {
-              exitedWithError = false;
-              closeView(context);
-            }
           },
           gestureNavigationEnabled: true,
         ),
