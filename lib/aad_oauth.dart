@@ -35,5 +35,5 @@ class AadOAuth {
   /// Perform Azure AD logout.
   Future<void> logout() async => _coreOAuth.logout();
 
-  Future<bool> needFullAuth() async => false;
+  Future<bool> needFullAuth() async => _coreOAuth.needFullAuth();
 }

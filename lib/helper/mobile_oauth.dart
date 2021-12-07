@@ -74,6 +74,7 @@ class MobileOAuth extends CoreOAuth {
   }
 
   /// Check if we need to relaunch a full auth
+  @override
   Future<bool> needFullAuth() async {
     var token = await _authStorage.loadTokenFromCache();
 
