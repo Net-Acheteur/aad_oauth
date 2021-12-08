@@ -59,7 +59,7 @@ var aadOauth = (function () {
 
     // Sign in with popup
     try {
-      const interactiveAuthResult = await myMSALObj.loginPopup({
+      const interactiveAuthResult = await myMSALObj.loginRedirect({
         scopes: tokenRequest.scopes,
         prompt: tokenRequest.prompt,
       });
