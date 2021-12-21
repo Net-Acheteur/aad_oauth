@@ -17,6 +17,8 @@ class CoreOAuth {
 
   Future<void> logout() async {}
 
+  Future<void> webAutoLogin() async {}
+
   Future<String?> getAccessToken() async => 'ACCESS_TOKEN';
 
   Future<String?> getIdToken() async => 'ID_TOKEN';

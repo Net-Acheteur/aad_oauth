@@ -30,6 +30,12 @@ external String? jsGetAccessToken();
 @JS('getIdToken')
 external String? jsGetIdToken();
 
+@JS('webAutoLogin')
+external void jsWebAutoLogin(
+  void Function() onSuccess,
+  void Function(dynamic) onError,
+);
+
 class WebOAuth extends CoreOAuth {
   WebOAuth(Config config) {
     jsInit(MsalConfig.construct(
@@ -91,6 +97,21 @@ class WebOAuth extends CoreOAuth {
       allowInterop(completer.complete),
       allowInterop((error) => completer.completeError(error)),
     );
+
+    return completer.future;
+  }
+
+  @override
+  Future<void> webAutoLogin() async {
+    final completer = Completer<void>();
+
+    jsWebAutoLogin(
+        allowInterop(completer.complete),
+        allowInterop(
+          (_error) => completer.completeError(
+            Exception('Access denied or authentication canceled.'),
+          ),
+        ));
 
     return completer.future;
   }

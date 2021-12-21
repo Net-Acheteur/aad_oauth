@@ -73,6 +73,9 @@ class MobileOAuth extends CoreOAuth {
     await _authStorage.clear();
   }
 
+  @override
+  Future<void> webAutoLogin() async {}
+
   /// Check if we need to relaunch a full auth
   @override
   Future<bool> needFullAuth() async {
