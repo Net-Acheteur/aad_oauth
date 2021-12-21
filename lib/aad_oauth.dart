@@ -36,4 +36,6 @@ class AadOAuth {
   Future<void> logout() async => _coreOAuth.logout();
 
   Future<bool> needFullAuth() async => _coreOAuth.needFullAuth();
+
+  Future<void> webAutoLogin() async => _coreOAuth.webAutoLogin();
 }

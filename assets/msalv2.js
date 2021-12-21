@@ -5,7 +5,7 @@ var aadOauth = (function () {
   let authResult = null;
 
   const tokenRequest = {
-    scopes: null,
+    scopes: 'openid profile email',
     // Hardcoded?
     prompt: null,
   };
@@ -18,6 +18,9 @@ var aadOauth = (function () {
         clientId: config.clientId,
         authority: "https://login.microsoftonline.com/" + config.tenant,
         redirectUri: config.redirectUri,
+        responseMode: 'form_post',
+        scope: tokenRequest.scopes,
+        responseType: 'code id_token',
       },
       cache: {
         cacheLocation: "localStorage",
@@ -40,9 +43,12 @@ var aadOauth = (function () {
     // Try to sign in silently
     if (refreshIfAvailable) {
       try {
+        const account = getAccount();
+
         // I think we want to skip the prompt option here.
         const silentAuthResult = await myMSALObj.acquireTokenSilent({
           scopes: tokenRequest.scopes,
+          account: account,
           prompt: "none",
         });
 
@@ -59,7 +65,7 @@ var aadOauth = (function () {
 
     // Sign in with popup
     try {
-      const interactiveAuthResult = await myMSALObj.loginRedirect({
+      const interactiveAuthResult = await myMSALObj.loginPopup({
         scopes: tokenRequest.scopes,
         prompt: tokenRequest.prompt,
       });
@@ -112,11 +118,31 @@ var aadOauth = (function () {
     return authResult ? authResult.idToken : null;
   }
 
+  async function webAutoLogin(onSuccess, onError) {
+    try {
+        const account = getAccount();
+        if(account) {
+          const silentAuthResult = await myMSALObj.acquireTokenSilent({
+              scopes: tokenRequest.scopes,
+              account: account,
+              prompt: "none",
+          });
+
+          authResult = silentAuthResult;
+        }
+        onSuccess();
+    } catch (error) {
+        // rethrow
+        onError(error);
+    }
+  }
+
   return {
     init: init,
     login: login,
     logout: logout,
     getIdToken: getIdToken,
     getAccessToken: getAccessToken,
+    webAutoLogin: webAutoLogin,
   };
 })();
