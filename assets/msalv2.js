@@ -122,20 +122,41 @@ var aadOauth = (function () {
     try {
         const account = getAccount();
         if(account) {
+        // TODO: Try to use the client id to renew idToken
           const silentAuthResult = await myMSALObj.acquireTokenSilent({
               scopes: tokenRequest.scopes,
               account: account,
               prompt: "none",
           });
 
-          authResult = silentAuthResult;
+          if(checkIfIdTokenStillValid(silentAuthResult.idToken)) {
+             authResult = silentAuthResult;
+          }else {
+             authResult = null;
+          }
         }
         onSuccess();
     } catch (error) {
         // rethrow
-        onError(error);
+        onSuccess(error);
     }
   }
+
+  function checkIfIdTokenStillValid(idToken) {
+    var now = Date.now() / 1000;
+    var dateToken = parseJwt(idToken)['exp'];
+    return now < dateToken;
+  }
+
+  function parseJwt (token) {
+      var base64Url = token.split('.')[1];
+      var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      var jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+      }).join(''));
+
+      return JSON.parse(jsonPayload);
+  };
 
   return {
     init: init,
