@@ -41,7 +41,9 @@ var aadOauth = (function () {
 
   async function login(refreshIfAvailable, onSuccess, onError) {
     // Try to sign in silently
-    if (refreshIfAvailable) {
+    var currentAccessToken = getAccessToken();
+    var currentIdToken = getIdToken();
+    if (refreshIfAvailable || (currentAccessToken != null && currentAccessToken != '' && currentIdToken != null && currentIdToken != '')) {
       try {
         const account = getAccount();
 
@@ -52,13 +54,13 @@ var aadOauth = (function () {
           prompt: "none",
         });
 
-        authResult = silentAuthResult;
-
-        // Skip interactive login
-        onSuccess();
-
-        return;
-      } catch {
+        if(silentAuthResult != null && silentAuthResult.idToken != null && checkIfIdTokenStillValid(silentAuthResult.idToken)) {
+            authResult = silentAuthResult;
+            // Skip interactive login
+            onSuccess();
+            return;
+        }
+      } catch{
         // Swallow errors and continue to interactive login
       }
     }
@@ -122,7 +124,7 @@ var aadOauth = (function () {
     try {
         const account = getAccount();
         if(account) {
-        // TODO: Try to use the client id to renew idToken
+          // TODO: Try to use the client id to renew idToken
           const silentAuthResult = await myMSALObj.acquireTokenSilent({
               scopes: tokenRequest.scopes,
               account: account,
