@@ -25,16 +25,21 @@ class RequestCode {
       userAgent: _config.userAgent,
     );
 
-    await _config.navigatorKey.currentState!.push(
-      MaterialPageRoute(
-        builder: (context) => Scaffold(
-            body: SafeArea(
-          child: Stack(
-            children: [_config.loader, webView],
-          ),
-        )),
-      ),
+    MaterialPageRoute materialPageRoute = MaterialPageRoute(
+      builder: (context) => Scaffold(
+          body: SafeArea(
+        child: Stack(
+          children: [_config.loader, webView],
+        ),
+      )),
     );
+
+    if(_config.navigatorKey != null) {
+      await _config.navigatorKey!.currentState!.push(materialPageRoute);
+    } else {
+      await _config.appRouter!.pushNativeRoute(materialPageRoute);
+    }
+    
     return _code;
   }
 
@@ -42,12 +47,20 @@ class RequestCode {
     var uri = Uri.parse(request.url);
 
     if (uri.queryParameters['error'] != null) {
-      _config.navigatorKey.currentState!.pop();
+      if(_config.navigatorKey != null) {
+        _config.navigatorKey!.currentState!.pop();
+      } else {
+        _config.appRouter!.pop();
+      }
     }
 
     if (uri.queryParameters['code'] != null) {
       _code = uri.queryParameters['code'];
-      _config.navigatorKey.currentState!.pop();
+      if(_config.navigatorKey != null) {
+        _config.navigatorKey!.currentState!.pop();
+      } else {
+        _config.appRouter!.pop();
+      }
     }
     return NavigationDecision.navigate;
   }

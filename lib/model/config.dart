@@ -1,7 +1,7 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-
 /// Parameters according to official Microsoft Documentation:
 /// - Azure AD https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-oauth2-auth-code-flow
 /// - Azure AD B2C: https://docs.microsoft.com/en-us/azure/active-directory-b2c/authorization-code-flow
@@ -115,7 +115,10 @@ class Config {
   bool isStub;
 
   /// Navigator key used to navigate to the login webview if interactive login is required
-  GlobalKey<NavigatorState> navigatorKey;
+  GlobalKey<NavigatorState>? navigatorKey;
+
+  /// AppRouter used to navigate to the login webview if interactive login is required
+  RootStackRouter? appRouter;
 
   /// User agent of web view. (using flutter_webview_plugin)
   String? userAgent;
@@ -171,8 +174,10 @@ class Config {
     this.isStub = false,
     this.loader = const SizedBox(),
     AndroidOptions? aOptions,
-    required this.navigatorKey,
-  })  : authorizationUrl = isB2C
+    this.navigatorKey,
+    this.appRouter,
+  })  : assert(navigatorKey != null || appRouter != null),
+        authorizationUrl = isB2C
             ? 'https://$tenant.b2clogin.com/$tenant.onmicrosoft.com/$policy/oauth2/v2.0/authorize'
             : 'https://login.microsoftonline.com/$tenant/oauth2/v2.0/authorize',
         tokenUrl = isB2C
