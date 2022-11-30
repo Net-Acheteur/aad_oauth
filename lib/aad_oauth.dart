@@ -31,6 +31,9 @@ class AadOAuth {
   /// Retrieve cached OAuth Id Token.
   Future<String?> getIdToken() async => _coreOAuth.getIdToken();
 
+  /// On web, set an account if present as the current account.
+  Future<void> recoverAccount() async => _coreOAuth.recoverAccount();
+
   /// Perform Azure AD logout.
   Future<void> logout() async => _coreOAuth.logout();
 }

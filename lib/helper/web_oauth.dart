@@ -35,6 +35,12 @@ external String? jsGetAccessToken();
 @JS('getIdToken')
 external String? jsGetIdToken();
 
+@JS('recoverAccount')
+external void jsRecoverAccount(
+    void Function() onSuccess,
+    void Function() onError,
+);
+
 class WebOAuth extends CoreOAuth {
   final Config config;
   WebOAuth(this.config) {
@@ -70,6 +76,20 @@ class WebOAuth extends CoreOAuth {
   @override
   Future<String?> getIdToken() async {
     return jsGetIdToken();
+  }
+
+  @override
+  Future<void> recoverAccount() async {
+    final completer = Completer<void>();
+
+    jsRecoverAccount(
+        allowInterop(
+                () => completer.complete()),
+      allowInterop(
+              () => completer.complete())
+    );
+
+    return completer.future;
   }
 
   @override
