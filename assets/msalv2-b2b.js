@@ -43,7 +43,6 @@ var aadOauth = (function () {
     // can await its completion in the login API
 
     redirectHandlerTask = myMSALObj.handleRedirectPromise();
-    }
   }
 
   /// Authorize user via refresh token or web gui if necessary.
