@@ -48,6 +48,10 @@ class MobileOAuth extends CoreOAuth {
   Future<String?> getIdToken() async =>
       (await _authStorage.loadTokenFromCache()).idToken;
 
+  /// On web, set an account if present as the current account.
+  @override
+  Future<void> recoverAccount() async { }
+
   /// Perform Azure AD logout.
   @override
   Future<void> logout() async {

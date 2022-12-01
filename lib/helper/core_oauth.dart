@@ -25,6 +25,9 @@ class CoreOAuth {
   Future<String?> getIdToken() async => throw UnsupportedFailure(
       ErrorType.Unsupported, 'Unsupported getAccessToken');
 
+  Future<void> recoverAccount() async => throw UnsupportedFailure(
+      ErrorType.Unsupported, 'Unsupported recoverAccount');
+
   factory CoreOAuth.fromConfig(Config config) =>
       config.isStub ? CoreOAuth() : getOAuthConfig(config);
 }
