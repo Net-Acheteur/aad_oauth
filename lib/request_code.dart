@@ -1,9 +1,10 @@
 import 'dart:async';
-import 'package:flutter/material.dart';
 
-import 'request/authorization_request.dart';
-import 'model/config.dart';
+import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+
+import 'model/config.dart';
+import 'request/authorization_request.dart';
 
 class RequestCode {
   final Config _config;
@@ -36,16 +37,13 @@ class RequestCode {
     final webView = WebViewWidget(controller: controller);
     await controller.loadRequest(launchUri);
 
-    if (_config.navigatorKey != null && _config.navigatorKey.currentState == null) {
-      throw Exception(
-        'Could not push new route using provided navigatorKey, Because '
-        'NavigatorState returned from provided navigatorKey is null. Please Make sure '
-        'provided navigatorKey is passed to WidgetApp. This can also happen if at the time of this method call '
-      );
-        'WidgetApp is not part of the flutter widget tree',
+    if (_config.navigatorKey != null && _config.navigatorKey!.currentState == null) {
+      throw Exception('Could not push new route using provided navigatorKey, Because '
+          'NavigatorState returned from provided navigatorKey is null. Please Make sure '
+          'provided navigatorKey is passed to WidgetApp. This can also happen if at the time of this method call ');
     }
 
-    MaterialPageRoute materialPageRoute = MaterialPageRoute(
+    var materialPageRoute = MaterialPageRoute(
       builder: (context) => Scaffold(
           body: SafeArea(
         child: Stack(
@@ -54,39 +52,38 @@ class RequestCode {
       )),
     );
 
-    if(_config.navigatorKey != null) {
+    if (_config.navigatorKey != null) {
       await _config.navigatorKey!.currentState!.push(materialPageRoute);
     } else {
       await _config.appRouter!.pushNativeRoute(materialPageRoute);
     }
-    
+
     return _code;
   }
 
-  Future<NavigationDecision> _onNavigationRequest(
-      NavigationRequest request) async {
+  Future<NavigationDecision> _onNavigationRequest(NavigationRequest request) async {
     try {
       var uri = Uri.parse(request.url);
 
       if (uri.queryParameters['error'] != null) {
-        if(_config.navigatorKey != null) {
+        if (_config.navigatorKey != null) {
           _config.navigatorKey!.currentState!.pop();
         } else {
-          _config.appRouter!.pop();
+          await _config.appRouter!.pop();
         }
       }
 
-        var checkHost = uri.host == _redirectUriHost;
+      var checkHost = uri.host == _redirectUriHost;
 
-        if (uri.queryParameters['code'] != null && checkHost) {
-          _code = uri.queryParameters['code'];
-        if(_config.navigatorKey != null) {
+      if (uri.queryParameters['code'] != null && checkHost) {
+        _code = uri.queryParameters['code'];
+        if (_config.navigatorKey != null) {
           _config.navigatorKey!.currentState!.pop();
         } else {
-          _config.appRouter!.pop();
+          await _config.appRouter!.pop();
         }
       }
-    }catch (_) {}
+    } catch (_) {}
     return NavigationDecision.navigate;
   }
 
@@ -94,18 +91,14 @@ class RequestCode {
     await WebViewCookieManager().clearCookies();
   }
 
-  String _constructUrlParams() => _mapToQueryParams(
-      _authorizationRequest.parameters, _config.customParameters);
+  String _constructUrlParams() => _mapToQueryParams(_authorizationRequest.parameters, _config.customParameters);
 
-  String _mapToQueryParams(
-      Map<String, String> params, Map<String, String> customParams) {
+  String _mapToQueryParams(Map<String, String> params, Map<String, String> customParams) {
     final queryParams = <String>[];
 
-    params.forEach((String key, String value) =>
-        queryParams.add('$key=${Uri.encodeQueryComponent(value)}'));
+    params.forEach((String key, String value) => queryParams.add('$key=${Uri.encodeQueryComponent(value)}'));
 
-    customParams.forEach((String key, String value) =>
-        queryParams.add('$key=${Uri.encodeQueryComponent(value)}'));
+    customParams.forEach((String key, String value) => queryParams.add('$key=${Uri.encodeQueryComponent(value)}'));
     return queryParams.join('&');
   }
 }
