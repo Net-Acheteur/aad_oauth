@@ -19,6 +19,9 @@ For using this library you have to create an azure app at the [Azure App registr
 
 Your minSdkVersion must be >= 20 in `android/app/build.gradle` section `android / defaultConfig` to support webview_flutter. Version 19 may build but will likely fail at runtime.
 
+If your app does not have the `android.permission.INTERNET` permission you must add it to the AndroidManifest
+`<uses-permission android:name="android.permission.INTERNET"/>`
+
 Afterwards you must create a navigatorKey and initialize the library as follow:
 
 ```dart
@@ -36,6 +39,7 @@ Afterwards you must create a navigatorKey and initialize the library as follow:
     webUseRedirect: true, // default is false - on web only, forces a redirect flow instead of popup auth
     //Optional parameter: Centered CircularProgressIndicator while rendering web page in WebView
     loader: Center(child: CircularProgressIndicator()),
+    postLogoutRedirectUri: 'http://your_base_url/logout', //optional
   );
 
   final AadOAuth oauth = new AadOAuth(config);
@@ -132,7 +136,7 @@ Add the following to your pubspec.yaml dependencies:
 
 ```yaml
 dependencies:
-  aad_oauth: "^0.4.1"
+  aad_oauth: "^0.4.4"
 ```
 
 ## Contribution
