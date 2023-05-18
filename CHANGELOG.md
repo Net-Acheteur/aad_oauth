@@ -2,7 +2,33 @@
 
 ## [Unreleased]
 
+## [0.4.4] - 20230516
+
+- Add cacheLocation configuration https://github.com/Earlybyte/aad_oauth/pull/220 (by @tigloo)
+- Always use myMSALObj.acquireTokenSilent to get fresh token https://github.com/Earlybyte/aad_oauth/pull/226 (by @ruicraveiro)
+- Added custom domain url with tenant Id for B2C with Azure Front Door https://github.com/Earlybyte/aad_oauth/pull/227 (by @jochemvanweelde)
+- Check navigator state https://github.com/Earlybyte/aad_oauth/pull/229 (by @easazade)
+
+## [0.4.3] - 20230327
+
+- Adding postLogoutRedirectUri - Sign-out with a redirect https://github.com/Earlybyte/aad_oauth/pull/217
+- Update flutter_secure_storage to 8.0.0 https://github.com/Earlybyte/aad_oauth/pull/216
+- Refresh authResult from cache in getAccessToken and getIdToken https://github.com/Earlybyte/aad_oauth/pull/215
+- Add `hasCachedAccountInformation` getter support https://github.com/Earlybyte/aad_oauth/pull/210
+- Custom parameters to support dynamic UI customization for B2C custom policies https://github.com/Earlybyte/aad_oauth/pull/207
+
+## [0.4.2] - 20230124
+
+- Add MockCoreOAuth for testing https://github.com/Earlybyte/aad_oauth/pull/185.
+- Update flutter_secure_storage to ^7.0.1, bump minor dependency versions https://github.com/Earlybyte/aad_oauth/pull/192
+- Fix request code issue in google signIn https://github.com/Earlybyte/aad_oauth/pull/193
+- Add optional parameter origin header for mobile token request https://github.com/Earlybyte/aad_oauth/pull/177
+- Fix net::ERR_CACHE_MISS on release https://github.com/Earlybyte/aad_oauth/pull/198
+- Update Webview https://github.com/Earlybyte/aad_oauth/pull/199
+- Add Azure B2C support for Flutter Web https://github.com/Earlybyte/aad_oauth/pull/201
+
 ## [0.4.1] - 20221124
+
 - Added web redirect authentication flow option https://github.com/Earlybyte/aad_oauth/pull/174.
   - Must use at least version 2.13.1 of MSAL library from MS in index.html.
   - Calculates an appropriate default redirect URI on mobile and web if not provided.
