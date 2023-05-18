@@ -18,7 +18,7 @@ dependencies:
   shared_preferences: ^2.1.1
   dartz: ^0.10.1
   equatable: ^2.0.5
-  auto_route: ^5.0.2
+  auto_route: ^7.1.0
 
 dev_dependencies:
   flutter_test:
