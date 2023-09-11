@@ -45,11 +45,21 @@ class RequestCode {
 
     var materialPageRoute = MaterialPageRoute(
       builder: (context) => Scaffold(
-          body: SafeArea(
-        child: Stack(
-          children: [_config.loader, webView],
+        body: WillPopScope(
+          onWillPop: () async {
+            if (await controller.canGoBack()) {
+              await controller.goBack();
+              return false;
+            }
+            return true;
+          },
+          child: SafeArea(
+            child: Stack(
+              children: [_config.loader, webView],
+            ),
+          ),
         ),
-      )),
+      ),
     );
 
     if (_config.navigatorKey != null) {
