@@ -9,7 +9,7 @@ import 'request/authorization_request.dart';
 class RequestCode {
   final Config _config;
   final AuthorizationRequest _authorizationRequest;
-  final _redirectUriHost;
+  final String _redirectUriHost;
   late NavigationDelegate _navigationDelegate;
   String? _code;
 
@@ -33,41 +33,40 @@ class RequestCode {
 
     await controller.setBackgroundColor(Colors.transparent);
     await controller.setUserAgent(_config.userAgent);
-
-    final webView = WebViewWidget(controller: controller);
     await controller.loadRequest(launchUri);
 
-    if (_config.navigatorKey != null && _config.navigatorKey!.currentState == null) {
-      throw Exception('Could not push new route using provided navigatorKey, Because '
-          'NavigatorState returned from provided navigatorKey is null. Please Make sure '
-          'provided navigatorKey is passed to WidgetApp. This can also happen if at the time of this method call ');
+    final webView = WebViewWidget(controller: controller);
+
+    if (_config.navigatorKey!.currentState == null) {
+      throw Exception(
+        'Could not push new route using provided navigatorKey, Because '
+        'NavigatorState returned from provided navigatorKey is null. Please Make sure '
+        'provided navigatorKey is passed to WidgetApp. This can also happen if at the time of this method call '
+        'WidgetApp is not part of the flutter widget tree',
+      );
     }
 
-    var materialPageRoute = MaterialPageRoute(
-      builder: (context) => Scaffold(
-        body: WillPopScope(
-          onWillPop: () async {
-            if (await controller.canGoBack()) {
-              await controller.goBack();
-              return false;
-            }
-            return true;
-          },
-          child: SafeArea(
-            child: Stack(
-              children: [_config.loader, webView],
+    await _config.navigatorKey!.currentState!.push(
+      MaterialPageRoute(
+        builder: (context) => Scaffold(
+          appBar: _config.appBar,
+          body: WillPopScope(
+            onWillPop: () async {
+              if (await controller.canGoBack()) {
+                await controller.goBack();
+                return false;
+              }
+              return true;
+            },
+            child: SafeArea(
+              child: Stack(
+                children: [_config.loader, webView],
+              ),
             ),
           ),
         ),
       ),
     );
-
-    if (_config.navigatorKey != null) {
-      await _config.navigatorKey!.currentState!.push(materialPageRoute);
-    } else {
-      await _config.appRouter!.pushNativeRoute(materialPageRoute);
-    }
-
     return _code;
   }
 
@@ -76,22 +75,14 @@ class RequestCode {
       var uri = Uri.parse(request.url);
 
       if (uri.queryParameters['error'] != null) {
-        if (_config.navigatorKey != null) {
-          _config.navigatorKey!.currentState!.pop();
-        } else {
-          await _config.appRouter!.pop();
-        }
+        _config.navigatorKey.currentState!.pop();
       }
 
       var checkHost = uri.host == _redirectUriHost;
 
       if (uri.queryParameters['code'] != null && checkHost) {
         _code = uri.queryParameters['code'];
-        if (_config.navigatorKey != null) {
-          _config.navigatorKey!.currentState!.pop();
-        } else {
-          await _config.appRouter!.pop();
-        }
+        _config.navigatorKey!.currentState!.pop();
       }
     } catch (_) {}
     return NavigationDecision.navigate;

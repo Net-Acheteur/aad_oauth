@@ -28,6 +28,7 @@ class AadOAuth {
 
   /// Retrieve cached OAuth Access Token.
   Future<String?> getAccessToken() async => _coreOAuth.getAccessToken();
+  // Future<String?> getAccessToken() async => _coreOAuth.getAccessToken();
 
   /// Retrieve cached OAuth Id Token.
   Future<String?> getIdToken() async => _coreOAuth.getIdToken();
@@ -39,6 +40,5 @@ class AadOAuth {
   Future<void> logout() async => _coreOAuth.logout();
 
   /// Checks if MSAL has cached information
-  Future<bool> get hasCachedAccountInformation async =>
-      _coreOAuth.hasCachedAccountInformation;
+  Future<bool> get hasCachedAccountInformation async => _coreOAuth.hasCachedAccountInformation;
 }

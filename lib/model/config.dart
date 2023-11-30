@@ -3,6 +3,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+
 /// Parameters according to official Microsoft Documentation:
 /// - Azure AD https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-oauth2-auth-code-flow
 /// - Azure AD B2C: https://docs.microsoft.com/en-us/azure/active-directory-b2c/authorization-code-flow
@@ -112,7 +113,13 @@ class Config {
   /// Azure Active Directory B2C provides business-to-customer identity as a service.
   final bool isB2C;
 
-  /// When using Azure AD B2C with a custom domain or Azure Front Door, 
+  /// Override of the authorization URL, can be used to enable ADFS authentication.
+  final String? customAuthorizationUrl;
+
+  /// Override of the token URL, can be used to enable ADFS authentication.
+  final String? customTokenUrl;
+
+  /// When using Azure AD B2C with a custom domain or Azure Front Door,
   /// the custom domain URL must be used instead of the default login.microsoftonline.com URL.
   /// This will change the issuer of the token to the custom domain URL.
   /// Example: https://account.examplecompany.com/01234567-89ab-cdef-0123-456789abcdef.
@@ -122,11 +129,11 @@ class Config {
   /// Flag whether to use a stub implementation for unit testing or not
   bool isStub;
 
-  /// Navigator key used to navigate to the login webview if interactive login is required
-  GlobalKey<NavigatorState>? navigatorKey;
-
   /// AppRouter used to navigate to the login webview if interactive login is required
   RootStackRouter? appRouter;
+
+  /// Navigator key used to navigate to the login webview if interactive login is required
+  GlobalKey<NavigatorState> navigatorKey;
 
   /// User agent of web view. (using flutter_webview_plugin)
   String? userAgent;
@@ -158,6 +165,9 @@ class Config {
   /// https://learn.microsoft.com/en-us/azure/active-directory/develop/scenario-spa-sign-in?tabs=javascript2#tabpanel_4_javascript2
   String? postLogoutRedirectUri;
 
+  /// add an app bar to the login page
+  PreferredSizeWidget? appBar;
+
   /// Determine an appropriate redirect URI for AAD authentication.
   /// On web, it is the location that the application is being served from.
   /// On mobile, it is https://login.live.com/oauth20_desktop.srf
@@ -169,7 +179,7 @@ class Config {
         base = base.substring(0, idx);
       }
       if (!base.endsWith('/')) {
-        base = base + '/';
+        base = '$base/';
       }
       return base;
     } else {
@@ -189,6 +199,7 @@ class Config {
     this.responseMode,
     this.state,
     this.prompt,
+    this.appRouter,
     this.codeChallenge,
     this.codeChallengeMethod,
     this.nonce = '12345',
@@ -196,6 +207,8 @@ class Config {
     this.clientSecret,
     this.resource,
     this.isB2C = false,
+    this.customAuthorizationUrl,
+    this.customTokenUrl,
     this.customDomainUrlWithTenantId,
     this.loginHint,
     this.domainHint,
@@ -205,23 +218,23 @@ class Config {
     this.loader = const SizedBox(),
     AndroidOptions? aOptions,
     CacheLocation? cacheLocation,
-    this.navigatorKey,
+    required this.navigatorKey,
     this.origin,
     this.customParameters = const {},
-    String? postLogoutRedirectUri,
-    this.appRouter,
-  })  : assert(navigatorKey != null || appRouter != null),
-        authorizationUrl = isB2C
-            ? (customDomainUrlWithTenantId == null 
-              ? 'https://$tenant.b2clogin.com/$tenant.onmicrosoft.com/$policy/oauth2/v2.0/authorize'
-              : '$customDomainUrlWithTenantId/$policy/oauth2/v2.0/authorize')
-            : 'https://login.microsoftonline.com/$tenant/oauth2/v2.0/authorize',
-        tokenUrl = isB2C
-            ? (customDomainUrlWithTenantId == null
-              ? 'https://$tenant.b2clogin.com/$tenant.onmicrosoft.com/$policy/oauth2/v2.0/token'
-              : '$customDomainUrlWithTenantId/$policy/oauth2/v2.0/token')
-            : 'https://login.microsoftonline.com/$tenant/oauth2/v2.0/token',
-        postLogoutRedirectUri = postLogoutRedirectUri,
+    this.postLogoutRedirectUri,
+    this.appBar,
+  })  : authorizationUrl = customAuthorizationUrl ??
+            (isB2C
+                ? (customDomainUrlWithTenantId == null
+                    ? 'https://$tenant.b2clogin.com/$tenant.onmicrosoft.com/$policy/oauth2/v2.0/authorize'
+                    : '$customDomainUrlWithTenantId/$policy/oauth2/v2.0/authorize')
+                : 'https://login.microsoftonline.com/$tenant/oauth2/v2.0/authorize'),
+        tokenUrl = customTokenUrl ??
+            (isB2C
+                ? (customDomainUrlWithTenantId == null
+                    ? 'https://$tenant.b2clogin.com/$tenant.onmicrosoft.com/$policy/oauth2/v2.0/token'
+                    : '$customDomainUrlWithTenantId/$policy/oauth2/v2.0/token')
+                : 'https://login.microsoftonline.com/$tenant/oauth2/v2.0/token'),
         aOptions = aOptions ?? AndroidOptions(encryptedSharedPreferences: true),
         cacheLocation = cacheLocation ?? CacheLocation.localStorage,
         redirectUri = redirectUri ?? getDefaultRedirectUri();
