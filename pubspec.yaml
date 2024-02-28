@@ -10,14 +10,21 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  flutter_secure_storage: ^9.0.0
-  webview_flutter: ^4.4.1
-  js: ^0.6.7
+  webview_flutter: ^4.7.0
+  js: ^0.7.1
   http: ^1.1.0
   shared_preferences: ^2.2.1
   dartz: ^0.10.1
   equatable: ^2.0.5
   auto_route: ^7.8.3
+
+  # flutter_secure_storage: ^9.0.0
+  flutter_secure_storage:
+    git:
+      # url: https://github.com/ThexXTURBOXx/flutter_secure_storage.git
+      url: https://github.com/fegea-immo/flutter_secure_storage.git
+      ref: develop
+      path: flutter_secure_storage
 
 dev_dependencies:
   flutter_test:

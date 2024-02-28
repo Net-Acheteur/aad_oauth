@@ -37,7 +37,7 @@ class RequestCode {
 
     final webView = WebViewWidget(controller: controller);
 
-    if (_config.navigatorKey!.currentState == null) {
+    if (_config.navigatorKey.currentState == null) {
       throw Exception(
         'Could not push new route using provided navigatorKey, Because '
         'NavigatorState returned from provided navigatorKey is null. Please Make sure '
@@ -46,7 +46,7 @@ class RequestCode {
       );
     }
 
-    await _config.navigatorKey!.currentState!.push(
+    await _config.navigatorKey.currentState!.push(
       MaterialPageRoute(
         builder: (context) => Scaffold(
           appBar: _config.appBar,
@@ -82,7 +82,7 @@ class RequestCode {
 
       if (uri.queryParameters['code'] != null && checkHost) {
         _code = uri.queryParameters['code'];
-        _config.navigatorKey!.currentState!.pop();
+        _config.navigatorKey.currentState!.pop();
       }
     } catch (_) {}
     return NavigationDecision.navigate;
