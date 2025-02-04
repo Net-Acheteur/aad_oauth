@@ -58,10 +58,8 @@ class RequestCode {
               }
               return true;
             },
-            child: SafeArea(
-              child: Stack(
-                children: [_config.loader, webView],
-              ),
+            child: Stack(
+              children: [_config.loader, webView],
             ),
           ),
         ),
